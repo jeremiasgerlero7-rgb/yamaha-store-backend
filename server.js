@@ -3,10 +3,20 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-
-
 const app = express();
-app.use(cors());
+
+// ✅ CORS configurado correctamente
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://yamaha-store-frontend.netlify.app'  // ⬅️ Tu URL de Netlify
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
