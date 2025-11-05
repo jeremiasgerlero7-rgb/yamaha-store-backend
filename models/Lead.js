@@ -1,0 +1,32 @@
+const mongoose = require('mongoose');
+
+const leadSchema = new mongoose.Schema({
+  nombre: {
+    type: String,
+    required: true
+  },
+  apellido: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  telefono: {
+    type: String,
+    required: true
+  },
+  vehiculo: {
+    type: String,
+    required: true
+  },
+  mensaje: {
+    type: String,
+    default: ''
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('Lead', leadSchema);

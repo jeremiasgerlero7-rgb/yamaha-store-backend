@@ -5,7 +5,6 @@ const cors = require('cors');
 
 const app = express();
 
-// ✅ CORS configurado - DEBE ir ANTES de cualquier otra ruta
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -16,14 +15,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Cache preflight por 10 minutos
+  maxAge: 600
 }));
 
-// Middleware para parsear JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta de prueba para verificar que el servidor funciona
 app.get('/', (req, res) => {
   res.json({ 
     message: '✅ Yamaha Store API funcionando',
@@ -31,18 +28,17 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected' });
 });
 
-// Rutas de la API
+// Rutas
 app.use('/api/products', require('./routes/products'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users')); 
 app.use('/api/faq', require('./routes/faq'));
+app.use('/api/leads', require('./routes/leads')); // ⬅️ NUEVA RUTA
 
-// Manejador de errores global
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   res.status(500).json({ 
@@ -51,12 +47,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Manejador para rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-// Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB conectado'))
   .catch(err => {
