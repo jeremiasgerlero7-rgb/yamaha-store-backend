@@ -3,26 +3,28 @@ const mongoose = require('mongoose');
 const leadSchema = new mongoose.Schema({
   nombre: {
     type: String,
-    required: true
-  },
-  apellido: {
-    type: String,
-    required: false
+    required: [true, 'El nombre es requerido'],
+    trim: true
   },
   email: {
     type: String,
-    required: false
+    required: false,
+    trim: true,
+    default: ''
   },
   telefono: {
     type: String,
-    required: true
+    required: [true, 'El teléfono es requerido'],
+    trim: true
   },
   vehiculo: {
     type: String,
-    required: true
+    required: [true, 'El vehículo es requerido'],
+    trim: true
   },
   mensaje: {
     type: String,
+    trim: true,
     default: ''
   }
 }, {
