@@ -9,7 +9,8 @@ const ProductSchema = new mongoose.Schema({
   cilindrada: { type: Number, default: '' },
   velocidadMax: { type: Number, default: '' },
   peso: { type: Number, default: '' },
-  disponible: { type: Boolean, default: true }
+  disponible: { type: Boolean, default: true },
+  cantidad: { type: Number, default: 0, min: 0 } // ✅ AGREGADO
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', ProductSchema);

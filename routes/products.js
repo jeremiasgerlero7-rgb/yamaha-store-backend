@@ -52,6 +52,8 @@ router.post('/', async (req, res) => {
       cilindrada: Number(req.body.cilindrada),
       velocidadMax: Number(req.body.velocidadMax),
       peso: Number(req.body.peso),
+      disponible: req.body.disponible !== undefined ? req.body.disponible : true, // ✅ AGREGADO
+      cantidad: Number(req.body.cantidad) || 0 // ✅ AGREGADO
     });
 
     console.log('💾 Guardando producto:', newProduct);
@@ -79,6 +81,8 @@ router.put('/:id', async (req, res) => {
       peso: Number(req.body.peso),
       descripcion: req.body.descripcion,
       imagen: req.body.imageUrl || req.body.imagen,
+      disponible: req.body.disponible !== undefined ? req.body.disponible : true, // ✅ AGREGADO
+      cantidad: Number(req.body.cantidad) || 0 // ✅ AGREGADO
     };
 
     const updated = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
