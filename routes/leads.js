@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
   try {
     console.log('📥 Datos recibidos:', req.body);
     
-    const { nombre, email, telefono, vehiculo, mensaje } = req.body;
+    const { nombre, email, telefono, vehiculo, vehiculoImagen, vehiculoPrecio, vehiculoCilindrada, mensaje } = req.body;
     
     // Validación detallada
     const errors = [];
@@ -40,6 +40,9 @@ router.post('/', async (req, res) => {
       email: email ? email.trim() : '',
       telefono: telefono.trim(),
       vehiculo: vehiculo.trim(),
+      vehiculoImagen: vehiculoImagen || '',
+      vehiculoPrecio: vehiculoPrecio || 0,
+      vehiculoCilindrada: vehiculoCilindrada || 0,
       mensaje: mensaje ? mensaje.trim() : ''
     });
     

@@ -22,6 +22,21 @@ const leadSchema = new mongoose.Schema({
     required: [true, 'El vehículo es requerido'],
     trim: true
   },
+  vehiculoImagen: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  vehiculoPrecio: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  vehiculoCilindrada: {
+    type: Number,
+    required: false,
+    default: 0
+  },
   mensaje: {
     type: String,
     trim: true,
