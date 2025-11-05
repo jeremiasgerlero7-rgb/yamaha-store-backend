@@ -5,7 +5,6 @@ const User = require('../models/User');
 
 // Middleware simple para verificar admin (opcional, puedes mejorarlo después)
 const verifyAdmin = async (req, res, next) => {
-  // Por ahora, lo dejamos sin protección. Luego puedes agregar verificación de token
   next();
 };
 

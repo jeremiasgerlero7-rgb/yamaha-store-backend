@@ -7,7 +7,7 @@ const leadSchema = new mongoose.Schema({
   },
   apellido: {
     type: String,
-    required: true
+    required: false
   },
   email: {
     type: String,
