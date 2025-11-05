@@ -15,12 +15,19 @@ router.get('/', async (req, res) => {
 // POST - Crear un nuevo lead
 router.post('/', async (req, res) => {
   try {
-    const { nombre, apellido, email, telefono, vehiculo, mensaje } = req.body;
+    const { nombre, email, telefono, vehiculo, mensaje } = req.body;
+    
+    // Validación básica
+    if (!nombre || !telefono || !vehiculo) {
+      return res.status(400).json({ 
+        message: 'Faltan campos requeridos',
+        required: ['nombre', 'telefono', 'vehiculo']
+      });
+    }
     
     const newLead = new Lead({
       nombre,
-      apellido,
-      email,
+      email: email || '', // Email opcional
       telefono,
       vehiculo,
       mensaje: mensaje || ''
@@ -29,7 +36,12 @@ router.post('/', async (req, res) => {
     const savedLead = await newLead.save();
     res.status(201).json(savedLead);
   } catch (error) {
-    res.status(400).json({ message: 'Error al crear lead', error: error.message });
+    console.error('Error creating lead:', error);
+    res.status(400).json({ 
+      message: 'Error al crear lead', 
+      error: error.message,
+      details: error.errors // Mongoose validation errors
+    });
   }
 });
 
