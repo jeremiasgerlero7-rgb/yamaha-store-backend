@@ -22,7 +22,7 @@ const leadSchema = new mongoose.Schema({
     required: [true, 'El vehículo es requerido'],
     trim: true
   },
-  vehiculoImagen: {
+  vehiculoImagen: { // ✅ CORREGIDO (antes era "Imagen")
     type: String,
     required: false,
     default: ''
@@ -37,10 +37,40 @@ const leadSchema = new mongoose.Schema({
     required: false,
     default: 0
   },
+  vehiculoCategoria: { // ✅ AGREGADO
+    type: String,
+    required: false,
+    default: ''
+  },
+  vehiculoPeso: { // ✅ AGREGADO
+    type: Number,
+    required: false,
+    default: 0
+  },
+  vehiculoVelocidadMax: { // ✅ AGREGADO
+    type: Number,
+    required: false,
+    default: 0
+  },
+  vehiculoCantidad: { // ✅ AGREGADO (cantidad que quiere comprar)
+    type: Number,
+    required: false,
+    default: 1
+  },
   mensaje: {
     type: String,
     trim: true,
     default: ''
+  },
+  estado: { // ✅ NUEVO: para controlar el flujo de ventas
+    type: String,
+    enum: ['pendiente', 'confirmada', 'cancelada'],
+    default: 'pendiente'
+  },
+  productId: { // ✅ NUEVO: referencia al producto original
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: false
   }
 }, {
   timestamps: true
