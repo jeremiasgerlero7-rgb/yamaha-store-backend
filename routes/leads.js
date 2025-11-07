@@ -1,116 +1,141 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
-const cloudinary = require('cloudinary').v2;
+const Lead = require('../models/Lead');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true
-});
-
-// GET /api/products
-router.get('/', async (req, res) => {
-  try {
-    console.log('🔍 Obteniendo productos...');
-    const products = await Product.find();
-    console.log(`✅ Productos encontrados: ${products.length}`);
-    res.json(products);
-  } catch (err) {
-    console.error('❌ Error al obtener productos:', err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// GET /api/products/:id
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// POST /api/products
+// ========== POST - Crear un nuevo lead ==========
 router.post('/', async (req, res) => {
   try {
-    console.log('📦 Datos recibidos:', req.body);
+    console.log('📥 Datos recibidos para crear lead:', req.body);
 
-    const newProduct = new Product({
+    const newLead = new Lead({
+      // Datos del cliente
       nombre: req.body.nombre,
-      categoria: req.body.categoria,
-      precio: Number(req.body.precio) || 0,
-      descripcion: req.body.descripcion,
-      imagen: req.body.imagen || 'https://placehold.co/400x300',
-      cilindrada: Number(req.body.cilindrada) || 0,
-      velocidadMax: Number(req.body.velocidadMax) || 0,
-      peso: Number(req.body.peso) || 0,
-      disponible: req.body.disponible !== undefined ? req.body.disponible : true,
-      cantidad: Number(req.body.cantidad) || 0
+      email: req.body.email || '',
+      telefono: req.body.telefono,
+      mensaje: req.body.mensaje || '',
+      
+      // Opciones
+      parteDePago: req.body.parteDePago || false,
+      financiacion: req.body.financiacion || false,
+      
+      // Datos del vehículo (copia del producto)
+      vehiculo: req.body.vehiculo || '',
+      vehiculoImagen: req.body.vehiculoImagen || '',
+      vehiculoPrecio: req.body.vehiculoPrecio || 0,
+      vehiculoCilindrada: req.body.vehiculoCilindrada || 0,
+      vehiculoCategoria: req.body.vehiculoCategoria || '',
+      vehiculoPeso: req.body.vehiculoPeso || 0,
+      vehiculoVelocidadMax: req.body.vehiculoVelocidadMax || 0,
+      vehiculoDescripcion: req.body.vehiculoDescripcion || '',
+      
+      // Referencia
+      productId: req.body.productId || null,
+      estado: 'pendiente'
     });
 
-    const saved = await newProduct.save();
-    console.log('✅ Producto guardado');
-    res.status(201).json(saved);
-  } catch (err) {
-    console.error('❌ Error:', err);
-    res.status(400).json({ message: err.message });
+    const savedLead = await newLead.save();
+    
+    console.log('✅ Lead guardado exitosamente:', savedLead._id);
+    
+    res.status(201).json(savedLead);
+  } catch (error) {
+    console.error('❌ Error al crear lead:', error);
+    res.status(400).json({ 
+      message: 'Error al crear lead', 
+      error: error.message
+    });
   }
 });
 
-// PUT /api/products/:id
-router.put('/:id', async (req, res) => {
+// ========== GET - Obtener todos los leads ==========
+router.get('/', async (req, res) => {
   try {
-    const updateData = {
-      nombre: req.body.nombre,
-      categoria: req.body.categoria,
-      precio: Number(req.body.precio) || 0,
-      cilindrada: Number(req.body.cilindrada) || 0,
-      velocidadMax: Number(req.body.velocidadMax) || 0,
-      peso: Number(req.body.peso) || 0,
-      descripcion: req.body.descripcion,
-      imagen: req.body.imagen,
-      disponible: req.body.disponible !== undefined ? req.body.disponible : true,
-      cantidad: Number(req.body.cantidad) || 0
+    const leads = await Lead.find().sort({ createdAt: -1 });
+    console.log(`📋 Se encontraron ${leads.length} leads`);
+    res.json(leads);
+  } catch (error) {
+    console.error('❌ Error al obtener leads:', error);
+    res.status(500).json({ message: 'Error al obtener leads', error: error.message });
+  }
+});
+
+// ========== GET - Obtener un lead por ID ==========
+router.get('/:id', async (req, res) => {
+  try {
+    const lead = await Lead.findById(req.params.id);
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead no encontrado' });
+    }
+    res.json(lead);
+  } catch (error) {
+    console.error('❌ Error al obtener lead:', error);
+    res.status(500).json({ message: 'Error al obtener lead', error: error.message });
+  }
+});
+
+// ========== GET - Obtener estadísticas ==========
+router.get('/stats/count', async (req, res) => {
+  try {
+    const pendientes = await Lead.countDocuments({ estado: 'pendiente' });
+    const confirmados = await Lead.countDocuments({ estado: 'confirmado' });
+    const cancelados = await Lead.countDocuments({ estado: 'cancelado' });
+    
+    const stats = {
+      pendientes,
+      confirmados,
+      cancelados,
+      total: pendientes + confirmados + cancelados
     };
-
-    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updated) return res.status(404).json({ message: 'Producto no encontrado' });
-
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    
+    console.log('📊 Estadísticas:', stats);
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ Error al obtener estadísticas:', error);
+    res.status(500).json({ message: 'Error al obtener estadísticas', error: error.message });
   }
 });
 
-// DELETE /api/products/:id
-router.delete('/:id', async (req, res) => {
+// ========== PUT - Actualizar estado de un lead ==========
+router.put('/:id/estado', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
-
-    if (product.imagen && product.imagen.includes('cloudinary')) {
-      try {
-        const cleanUrl = product.imagen.replace(/\/image\/upload\/[^/]+/, '/image/upload').replace(/\/v\d+/, '');
-        const match = cleanUrl.match(/\/image\/upload\/(.+?)\.[^.]+$/);
-        const publicId = match ? match[1] : null;
-
-        if (publicId) {
-          await cloudinary.uploader.destroy(publicId);
-          console.log('✅ Imagen eliminada de Cloudinary');
-        }
-      } catch (err) {
-        console.warn('⚠️ No se pudo eliminar imagen:', err.message);
-      }
+    const { estado } = req.body;
+    
+    if (!['pendiente', 'confirmado', 'cancelado'].includes(estado)) {
+      return res.status(400).json({ message: 'Estado inválido' });
     }
 
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Producto eliminado' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const lead = await Lead.findByIdAndUpdate(
+      req.params.id,
+      { estado },
+      { new: true }
+    );
+
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead no encontrado' });
+    }
+
+    console.log(`✅ Lead ${lead._id} actualizado a estado: ${estado}`);
+    res.json(lead);
+  } catch (error) {
+    console.error('❌ Error al actualizar estado:', error);
+    res.status(500).json({ message: 'Error al actualizar estado', error: error.message });
+  }
+});
+
+// ========== DELETE - Eliminar un lead ==========
+router.delete('/:id', async (req, res) => {
+  try {
+    const lead = await Lead.findByIdAndDelete(req.params.id);
+    
+    if (!lead) {
+      return res.status(404).json({ message: 'Lead no encontrado' });
+    }
+
+    console.log(`🗑️ Lead ${lead._id} eliminado`);
+    res.json({ message: 'Lead eliminado correctamente', lead });
+  } catch (error) {
+    console.error('❌ Error al eliminar lead:', error);
+    res.status(500).json({ message: 'Error al eliminar lead', error: error.message });
   }
 });
 

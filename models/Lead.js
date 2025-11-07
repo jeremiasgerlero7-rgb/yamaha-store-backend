@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema({
+  // ========== DATOS DEL CLIENTE (lo que ingresa el usuario) ==========
   nombre: {
     type: String,
     required: [true, 'El nombre es requerido'],
@@ -8,8 +9,8 @@ const leadSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: false,
     trim: true,
+    lowercase: true,
     default: ''
   },
   telefono: {
@@ -17,63 +18,68 @@ const leadSchema = new mongoose.Schema({
     required: [true, 'El teléfono es requerido'],
     trim: true
   },
+  mensaje: {
+    type: String,
+    default: ''
+  },
+  
+  // ========== OPCIONES ADICIONALES ==========
+  parteDePago: {
+    type: Boolean,
+    default: false
+  },
+  financiacion: {
+    type: Boolean,
+    default: false
+  },
+  
+  // ========== DATOS DEL VEHÍCULO (copia del producto) ==========
   vehiculo: {
     type: String,
-    required: [true, 'El vehículo es requerido'],
-    trim: true
+    default: ''
   },
-  vehiculoImagen: { // ✅ CORREGIDO (antes era "Imagen")
+  vehiculoImagen: {
     type: String,
-    required: false,
     default: ''
   },
   vehiculoPrecio: {
     type: Number,
-    required: false,
     default: 0
   },
   vehiculoCilindrada: {
     type: Number,
-    required: false,
     default: 0
   },
-  vehiculoCategoria: { // ✅ AGREGADO
+  vehiculoCategoria: {
     type: String,
-    required: false,
     default: ''
   },
-  vehiculoPeso: { // ✅ AGREGADO
+  vehiculoPeso: {
     type: Number,
-    required: false,
     default: 0
   },
-  vehiculoVelocidadMax: { // ✅ AGREGADO
+  vehiculoVelocidadMax: {
     type: Number,
-    required: false,
     default: 0
   },
-  vehiculoCantidad: { // ✅ AGREGADO (cantidad que quiere comprar)
-    type: Number,
-    required: false,
-    default: 1
-  },
-  mensaje: {
+  vehiculoDescripcion: {
     type: String,
-    trim: true,
     default: ''
   },
-  estado: { // ✅ NUEVO: para controlar el flujo de ventas
-    type: String,
-    enum: ['pendiente', 'confirmada', 'cancelada'],
-    default: 'pendiente'
-  },
-  productId: { // ✅ NUEVO: referencia al producto original
+  
+  // ========== REFERENCIA Y ESTADO ==========
+  productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
-    required: false
+    default: null
+  },
+  estado: {
+    type: String,
+    enum: ['pendiente', 'confirmado', 'cancelado'],
+    default: 'pendiente'
   }
 }, {
-  timestamps: true
+  timestamps: true // Crea automáticamente createdAt y updatedAt
 });
 
 module.exports = mongoose.model('Lead', leadSchema);
